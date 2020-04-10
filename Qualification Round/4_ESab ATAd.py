@@ -1,234 +1,154 @@
 # https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9e
 
-import random
-random.seed()
-
-guess = ''
-B = 100
-count = 1
-for x in range(B):
-    guess += '1' if random.random()>0.5 else '0'
-
-def judgeSystem(pos):
-    global guess, B, count
-    if type(pos) == int:            
-        if count%10 == 1:
-            r = random.choice([0,1,2,3])
-            if r == 0: #Normal
-                pass
-            elif r == 1: #Inviertido
-                aux = ''
-                for x in guess:
-                    aux += '1' if x=='0' else '0'
-                guess = aux
-
-            elif r == 2: #Espejo
-                guess = guess[::-1]
-            elif r == 3: #Inertido espejo
-                aux = ''
-                for x in guess:
-                    aux += '1' if x=='0' else '0'
-                guess = aux[::-1]
-            print(' - ',guess)
-        print(count,' - ',pos,' , ',guess[pos-1])
-        count += 1
-        return guess[pos-1]
-
-    elif type(pos) == str:
-        if pos == guess:
-            print('Y, ',pos,count)
-            return 'Y'
-        else:
-            print('N, ',pos,' - ',guess)
-            return 'N'
-
-def solve(B):
-    s = ['']*B
-
-    c = 1
+T, B = map(int, input().split())
+for tt in range(T):
+    ans = ['']*B
+    sub = ['']*B
+    
+    c = 1   # Counter of times we have asked
     dct = {}
-    ki, kd = None, None
-
+    ki, kd = None, None # Indexes of the left number of the pair of equal, different numbers 
+    
     left, right = 1, B
-    while left < right and (not ki or not kd):
-        l = judgeSystem(left)
-        r = judgeSystem(right)
-        dct[left] = l+r
-
-        if l==r and not ki: 
-            s[left-1], s[B-left] = '0', '0'
-            ki = left
-            kx = l
-        if l!=r and not kd: 
-            s[left-1], s[B-left] = '0', '1'
-            kd = left
-            ky = l
-
-        left, right = left+1, right-1
+    while left < right: # Search for a pair of equal numbers and a pair of different numbers
+        print(left)
+        l = input()
+        print(right)
+        r = input()
         c += 2
-    #print(dct)
-
-    if right < left and (not ki or not kd): # Todas las parejas de espejos fueron iguales o diferentes
-        d = 0
+        
+        dct[left] = l+r
+        
+        if not ki and l==r: ki = left
+        if not kd and l!=r: kd = left
+        if ki and kd:       break       # If you have it already, break the while
+        left, right = left+1, right-1   # Change the pointers
+    
+    while(c%10 != 1): # Set again the counter in a number%10 == 1
+        print(1)
+        l = input()
+        c += 1
+    
+    if not ki or not kd: # This means that all the pairs have equal numbers or different
         left = 1
-        while d < B//10:
-            l = judgeSystem(left)
-            if l == dct[left][0]:   # Si es igual, entonces 5 izquierdas son iguales a sus espejos
+        while left <= B//2:
+            print(left)
+            l = input()
+            if l == dct[left][0]: # If the first is equal, then the rest as well (5 left, 5 right)
                 for x in range(5):
-                    s[left+x-1] = dct[left+x][0]
-                    s[B-left-x] = dct[left+x][1]
-            else:                   # Si es igual, entonces los 5 izquierdas y espejos son sus inversos
+                    ans[left+x-1] = dct[left+x][0]
+                    ans[B-left-x] = dct[left+x][1]
+            else:
                 for x in range(5): 
-                    s[left+x-1] = '1' if dct[left+x][0]=='0' else '0'
-                    s[B-left-x] = '1' if dct[left+x][1]=='0' else '0'
-            d += 1
+                    ans[left+x-1] = '1' if dct[left+x][0]=='0' else '0'
+                    ans[B-left-x] = '1' if dct[left+x][1]=='0' else '0'
             left += 5
-        #print(s)
-        l = judgeSystem(''.join(s))
-        if l == 'Y':
-            return None
-        elif l == 'N':
-            exit()
-    else:                           # Existen 2 parejas de iguales y diferentes
-        while(c%10 != 1):
-            l = judgeSystem(left)
-            r = judgeSystem(right)
-            c += 2
-
-        d = 1
+    else: # This means that there are the 2 pairs of equal and diff numbers
         left = 1
-        if max(ki,kd)%5 == 0:
-            maxi = max(ki,kd)-5+1 
-        else:
-            maxi = max(ki,kd) - max(ki,kd)%5 +1
+        maxi = max(ki,kd)+1
+        maxi -= 5 if max(ki,kd)%5 == 0 else max(ki,kd)%5 # Max number for the while
 
-        if maxi > 1:
-            kx = judgeSystem(ki)
-            ky = judgeSystem(kd)
-            kk = kx+ky
+        if 1 < maxi: # If maxi is 1, there is not need to use dct for the first values
+            print(ki)
+            kx = input()
+            print(kd)
+            ky = input()
             c += 2
-
-            while True:
-                if d == maxi:
-                    break
-                elif d == 1:
+            
+            kk = kx+ky
+            while left < maxi:
+                if left == 1:   #First case, dont ask for the value
                     if ki == 1:     flag = kx == dct[1][0]
                     elif kd == 1:   flag = ky == dct[1][0]
                 else:
-                    flag = judgeSystem(d) == dct[d][0]
+                    print(left)
+                    l = input()
+                    flag = l == dct[left][0]
                     c += 1
-
-                for x in range(d,min(d+5,max(ki,kd))):
-                    if flag:    # Si don iguales y los pasamos
+                    
+                for x in range(left,left+5):
+                    if flag:    # If both are equal, we pass
                         if kk == '00':      # Normal
-                            s[x-1] = dct[x][0]
-                            s[B-x] = dct[x][1]
-                        elif kk == '01':    # Espejo
-                            s[x-1] = dct[x][1]
-                            s[B-x] = dct[x][0]
-                        elif kk == '10':    # Inverso espejo
-                            s[x-1] = '1' if dct[x][1]=='0' else '0'
-                            s[B-x] = '1' if dct[x][0]=='0' else '0'
-                        elif kk == '11':    # Inverso
-                            s[x-1] = '1' if dct[x][0]=='0' else '0'
-                            s[B-x] = '1' if dct[x][1]=='0' else '0'
-                    else:       # Si son diferentes e invertimos
-                        if kk == '00':      # Inverso
-                            s[x-1] = '1' if dct[x][0]=='0' else '0'
-                            s[B-x] = '1' if dct[x][1]=='0' else '0'
-                        elif kk == '01':    # Inverso Espejo
-                            s[x-1] = '1' if dct[x][1]=='0' else '0'
-                            s[B-x] = '1' if dct[x][0]=='0' else '0'
-                        elif kk == '10':    # Espejo
-                            s[x-1] = dct[x][1]
-                            s[B-x] = dct[x][0]
+                            sub[x-1] = dct[x][0]
+                            sub[B-x] = dct[x][1]
+                        elif kk == '01':    # Mirror
+                            sub[x-1] = dct[x][1]
+                            sub[B-x] = dct[x][0]
+                        elif kk == '10':    # Inverse Mirror
+                            sub[x-1] = '1' if dct[x][1]=='0' else '0'
+                            sub[B-x] = '1' if dct[x][0]=='0' else '0'
+                        elif kk == '11':    # Inverse
+                            sub[x-1] = '1' if dct[x][0]=='0' else '0'
+                            sub[B-x] = '1' if dct[x][1]=='0' else '0'
+                    else:       # We do the operation inverse
+                        if kk == '00':      # Inverse
+                            sub[x-1] = '1' if dct[x][0]=='0' else '0'
+                            sub[B-x] = '1' if dct[x][1]=='0' else '0'
+                        elif kk == '01':    # Inverse Mirror
+                            sub[x-1] = '1' if dct[x][1]=='0' else '0'
+                            sub[B-x] = '1' if dct[x][0]=='0' else '0'
+                        elif kk == '10':    # Mirrow
+                            sub[x-1] = dct[x][1]
+                            sub[B-x] = dct[x][0]
                         elif kk == '11':    # Normal
-                            s[x-1] = dct[x][0]
-                            s[B-x] = dct[x][1]
-                d += 5
+                            sub[x-1] = dct[x][0]
+                            sub[B-x] = dct[x][1]
+                left += 5
             
-            while(c%10 != 1):
-                l = judgeSystem(1)
+            while(c%10 != 1): # Set again the counter in a number%10 == 1
+                print(1)
+                l = input()
                 c += 1
-        #print(s)
-
-        while d <= B//2:
-            kx = judgeSystem(ki)
-            ky = judgeSystem(kd)
-            kk = kx+ky
-            c += 2
-
-            for x in range(d,min(B//2+1,d+4)):
-                l = judgeSystem(x)
-                r = judgeSystem(B-x+1)
-                c += 2
-
-                if kk == '00':      # Normal
-                    s[x-1] = l
-                    s[B-x] = r
-                elif kk == '01':    # Espejo
-                    s[x-1] = r
-                    s[B-x] = l
-                elif kk == '10':    # Inverso espejo
-                    s[x-1] = '1' if r=='0' else '0'
-                    s[B-x] = '1' if l=='0' else '0'
-                elif kk == '11':    # Inverso
-                    s[x-1] = '1' if l=='0' else '0'
-                    s[B-x] = '1' if r=='0' else '0'
-            
-            left, right = left+1, right-1
-            d += 4
-    
-    a = ['']*B
-    for x in range(1, B//2 + 1):
-        if kk == '00':      # Normal
-            a[x-1] = s[x-1]
-            a[B-x] = s[B-x]
-        elif kk == '01':    # Espejo
-            a[x-1] = s[B-x]
-            a[B-x] = s[x-1]
-        elif kk == '10':    # Inverso espejo
-            a[x-1] = '1' if s[B-x]=='0' else '0'
-            a[B-x] = '1' if s[x-1]=='0' else '0'
-        elif kk == '11':    # Inverso
-            a[x-1] = '1' if s[x-1]=='0' else '0'
-            a[B-x] = '1' if s[B-x]=='0' else '0'
-    
-    #print(''.join(s))
-    print(''.join(a))
-    l = judgeSystem(''.join(a))
-    if l == 'Y':
-        return None
-    elif l == 'N':
-        quit()
-
-if B==10:
-    a = []
-    for x in range(10):
-        a.append(judgeSystem(x+1))
-    
-    aux = judgeSystem(''.join(a))
-    if aux == 'T':
-        #continue
-        pass
-    elif aux == 'N':
-        exit()
-else:
-    solve(B)
-
-""" for w in range(2**20):
-    guess = ''
-    r = w
-    for x in range(20):
-        if r%2 == 1:
-            guess += '1'
-        else:
-            guess += '0'
         
-        r = r//2
-
-    count = 1
-
-    #print(w,' - ',guess)
-
-    solve(B) """
+        # Now, for the rest of the number we first ask for Ki,Kd
+        # So we can know in which case of the random we are
+        # We are setting 'sub' in the case that ki, kd are both 0
+        while left <= B//2:
+            print(ki)
+            kx = input()
+            print(kd)
+            ky = input()
+            c += 2
+            
+            kk = kx+ky
+            for x in range(left,min(B//2+1,left+4)):
+                print(x)
+                l = input()
+                print(B-x+1)
+                r = input()
+                c += 2
+                
+                if kk == '00':      # Normal
+                    sub[x-1] = l
+                    sub[B-x] = r
+                elif kk == '01':    # Mirror
+                    sub[x-1] = r
+                    sub[B-x] = l
+                elif kk == '10':    # Inverse Mirror
+                    sub[x-1] = '1' if r=='0' else '0'
+                    sub[B-x] = '1' if l=='0' else '0'
+                elif kk == '11':    # Inverse
+                    sub[x-1] = '1' if l=='0' else '0'
+                    sub[B-x] = '1' if r=='0' else '0'
+            left += 4
+        
+        # Now, we pass sub to the actual case of the bits
+        # For that we need to look at the case of KK
+        for x in range(1, B//2+1):
+            if kk == '00':      # Normal
+                ans[x-1] = sub[x-1]
+                ans[B-x] = sub[B-x]
+            elif kk == '01':    # Mirror
+                ans[x-1] = sub[B-x]
+                ans[B-x] = sub[x-1]
+            elif kk == '10':    # Inverse Mirror
+                ans[x-1] = '1' if sub[B-x]=='0' else '0'
+                ans[B-x] = '1' if sub[x-1]=='0' else '0'
+            elif kk == '11':    # Inverse
+                ans[x-1] = '1' if sub[x-1]=='0' else '0'
+                ans[B-x] = '1' if sub[B-x]=='0' else '0'
+    
+    print(''.join(ans)) # Print the value
+    aux = input()
+    if aux == 'T':      continue
+    elif aux == 'N':    exit()
