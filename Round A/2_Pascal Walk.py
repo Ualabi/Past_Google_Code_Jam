@@ -1,4 +1,4 @@
-# Link: https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
+# https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
 
 T = int(input())
 for ii in range(T):
