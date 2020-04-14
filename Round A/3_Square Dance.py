@@ -1,4 +1,4 @@
-# Link: https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
+# https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
 
 def getField(arr,r,c):
     follow = set()
