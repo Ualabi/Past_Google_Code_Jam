@@ -1,3 +1,5 @@
+# Link: https://codingcompetitions.withgoogle.com/codejam/round/000000000019fef4/00000000003179a1
+
 def solve(A):
     digits = set()
     B = {}
