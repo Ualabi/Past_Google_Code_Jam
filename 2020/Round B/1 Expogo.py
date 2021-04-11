@@ -1,4 +1,4 @@
-# Link: https://codingcompetitions.withgoogle.com/codejam/round/000000000019fef2/00000000002d5b62
+# https://codingcompetitions.withgoogle.com/codejam/round/000000000019fef2/00000000002d5b62
 
 def solve(x,y,h):
     if x == 0 and y == 0:
